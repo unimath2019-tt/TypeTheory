@@ -125,49 +125,111 @@ Defined.
   
 Lemma SET_reindx_structure : reindx_structure SET_tt_structure.
 Proof.
-  unfold reindx_structure.
   use tpair.
   - cbn.
     intros Δ Γ A σ c.
     exact (A (σ c)).
--
+  - cbn.
+    intros Δ Γ A a σ d.
+    exact (a (σ d)).
+Defined.
 
-  
-  
 Definition SET_tt_reindx_type_struct : tt_reindx_type_struct SET.
-Admitted.
-
+Proof.
+  unfold tt_reindx_type_struct, tt_reindx_comp_1_struct, comp_2_struct.
+  use tpair.
+  - unfold  tt_reindx_struct.
+    use tpair.
+    + exact (SET_tt_structure,, SET_reindx_structure).
+    + simpl.
+      unfold comp_1_struct.
+      simpl.
+      intros Γ A.
+      use tpair.
+      * exact (total2_hSet A).
+      * simpl.
+        exact pr1.
+  - simpl.
+    intros Γ A.
+    cbn.
+    split.
+    + exact pr2.
+    + intros Δ σ a d.
+      exact (σ d,, a d).
+Defined.
+    
 Lemma SET_reindx_laws : reindx_laws SET_tt_reindx_type_struct.
+Proof.
+  unfold reindx_laws.
+  use tpair.
+  - unfold reindx_laws_type.
+    simpl.
+    split.
+    + intros Γ A.
+      cbn.
+      exact (idpath A).
+    + intros.
+      exact (idpath _).
+  - simpl.
+    unfold reindx_laws_terms.
+    simpl.
+    use tpair.
+    + intros.
+      exact (idpath _).
+    + simpl.
+      intros.
+      exact (idpath _).
+Defined.
+
+
+Definition SET_CwF : cwf_struct (SET).
+Proof.
+  exists SET_tt_reindx_type_struct.
+  unfold cwf_laws.
+  simpl.
+  Print cwf_laws.
+  use tpair.
+  - exists SET_reindx_laws.
+    unfold comp_laws_1_2.
+    simpl.
+    use tpair.
+    + intros.
+      unfold pairing.
+      simpl.
+      use tpair.
+      * unfold compose.
+        simpl.
+        exact (idpath _).
+      * simpl.
+        exact (idpath _).
+    + simpl.
+      unfold comp_law_3.
+      simpl.
+      use tpair.
+      * unfold compose.
+        simpl.
+        intros.
+        exact (idpath _).
+      * simpl.
+        unfold comp_law_4.
+        intros.
+        exact (idpath _).
+  - simpl.
+    use tpair.
+    * unfold has_homsets.
+      intros.
+      simpl.
+      unfold hset_precategory_ob_mor in *.
+      apply isaset_set_fun_space.
+    * simpl.
+      use tpair.
+      + admit.
+      + simpl.
+        intros.
+        apply isaset_forall_hSet.
 Admitted.
 
-Print tt_structure.
+        
+        
 
-(* This is commented as we cannot complete it *)
-(* Definition PreShv_CwF : cwf_struct (PreShv C). *)
-(* Proof. *)
-(* exists PreShv_tt_reindx_type_struct. *)
-(* mkpair. *)
-(* - exists PreShv_reindx_laws. *)
-(*   repeat split. *)
-(*   + intros Γ A Δ σ a. *)
-(*     exists (subst_pair_p hsC σ a). *)
-(*     intermediate_path (transportf (λ x, Δ ⊢ x) *)
-(*             (subst_type_pair_p hsC σ a) (subst_term hsC (subst_pair hsC σ a) (@ctx_last _ hsC _ A))). *)
-(*     admit. (* this should be provable, but painful *) *)
-(*     apply subst_pair_q. *)
-(*   + intros Γ A Δ Θ σ1 σ2 a. *)
-(*     exact (subst_pair_subst hsC σ1 σ2 a). *)
-(*   + intros Γ A. *)
-(*     apply (@subst_pair_id C hsC Γ A). *)
-(* - repeat split. *)
-(*   + apply (functor_category_has_homsets C^op HSET has_homsets_HSET). *)
-(*   + intros Γ. *)
-(*     admit. (* this is not provable! *) *)
-(*   + intros Γ A. *)
-(*     use isaset_total2. *)
-(*     * repeat (apply impred_isaset; intro); apply setproperty. *)
-(*     * intros a; repeat (apply impred_isaset; intro). *)
-(*       apply isasetaprop, setproperty. *)
-(* Admitted. *)
 
-End CwF.
