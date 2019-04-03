@@ -80,34 +80,101 @@ Proof.
   - unfold  tt_reindx_struct.
     use tpair.
     + exact (VSET_tt_structure,, VSET_reindx_structure).
-    + simpl.
+    + cbn.
       unfold comp_1_struct.
-      simpl.
+      cbn.
       intros Γ A.
-      use tpair.
-      * exact (pr1 (Vsigma _ A)).
-      * cbn.
-        rewrite (pr2 (Vsigma _ A)); exact pr1.
+      destruct (Vsigma _ A) as [ΓA e].
+      exists ΓA.
+      SearchAbout (?x = ?y -> ?y = ?x).
+      apply (@transportf _ (fun z => z →  El Γ) _ _ (pathsinv0 (base_paths _ _ e))).
+      exact pr1.
   - simpl.
     intros Γ A.
     cbn.
-    split.
-    + destruct (Vsigma Γ A) as [C e]; cbn.
-      intros.
-      admit.
-    + intros Δ σ a d.
-      rewrite (pr2 (Vsigma Γ A)).
-      exact (σ d,, a d).
-Admitted.    
+    split;
+    destruct (Vsigma Γ A) as [ΓA e]; cbn; unfold pr1hSet in *.
+    + apply transportD.
+        exact pr2.
+    + intros.
+       apply (@transportf _ (fun z => z) _ _ (! (base_paths _ _ e))).
+       cbn in *. 
+       exists (γ X).
+       apply a.        
+Defined.
 
+       
 Lemma VSET_reindx_laws : reindx_laws VSET_tt_reindx_type_struct.
 Proof.
-Admitted.
+  unfold reindx_laws.
+  use tpair.
+  - unfold reindx_laws_type.
+    simpl.
+    split.
+    + intros Γ A.
+      cbn.
+      exact (idpath A).
+    + intros.
+      exact (idpath _).
+  - simpl.
+    unfold reindx_laws_terms.
+    simpl.
+    use tpair.
+    + intros.
+      exact (idpath _).
+    + simpl.
+      intros.
+      exact (idpath _).
+ Defined.
 
 
 Definition VSET_CwF : cwf_struct (VSET).
 Proof.
-
+  exists VSET_tt_reindx_type_struct.
+  unfold cwf_laws.
+  simpl.
+  Print cwf_laws.
+  use tpair.
+  - exists VSET_reindx_laws.
+    unfold comp_laws_1_2.
+    simpl.
+    use tpair.
+    + intros.
+      unfold pairing.
+      simpl.
+      use tpair.
+      * unfold compose.
+        apply funextfun; intros x;  cbn.
+        Check @transportD.
+         destruct (Vsigma Γ A) as [ΓA e]; cbn.
+         fold pr1hSet in *.
+        admit.
+      * simpl.
+         admit.
+   + simpl.
+      unfold comp_law_3.
+      simpl.
+      use tpair.
+      * unfold compose.
+        simpl.
+        intros.
+        exact (idpath _).
+      * simpl.
+        unfold comp_law_4.
+        admit.
+  - simpl.
+    use tpair.
+    * unfold has_homsets.
+      intros.
+      simpl.
+      unfold hset_precategory_ob_mor in *.
+      apply isaset_set_fun_space.
+    * simpl.
+      use tpair.
+      + admit.
+      + simpl.
+        intros.
+        apply isaset_forall_hSet.
 Admitted.
 
         
