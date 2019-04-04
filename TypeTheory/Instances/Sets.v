@@ -98,14 +98,28 @@ And the last square is a pullback square ([isPullback_q_gen_mor]).
 Written by: Anders Mörtberg, 2017
 
  *)
-Require Import UniMath.MoreFoundations.All.
+Require Import UniMath.MoreFoundations.Tactics.
+Require Import UniMath.MoreFoundations.PartA.
+Require Import UniMath.MoreFoundations.Notations.
+Require Import UniMath.MoreFoundations.Univalence.
 
-Require Import UniMath.CategoryTheory.All.
-Require Import TypeTheory.OtherDefs.CwF_Pitts.
+Require Import UniMath.CategoryTheory.Core.Categories.
+Require Import UniMath.CategoryTheory.Core.Functors.
+Require Import UniMath.CategoryTheory.Adjunctions.Core.
+Require Import UniMath.CategoryTheory.opp_precat.
+Require Import UniMath.CategoryTheory.whiskering.
+Require Import UniMath.CategoryTheory.Equivalences.Core.
+Require Import UniMath.CategoryTheory.RightKanExtension.
+Require Import UniMath.CategoryTheory.limits.graphs.limits.
+Require Import UniMath.CategoryTheory.limits.graphs.eqdiag.
+Require Import UniMath.CategoryTheory.limits.pullbacks.
+Require Import UniMath.CategoryTheory.Presheaf.
+Require Import UniMath.CategoryTheory.ElementsOp.
 
 Require Import TypeTheory.Auxiliary.CategoryTheoryImports.
 Require Import TypeTheory.Auxiliary.Auxiliary.
-(* Require Import TypeTheory.ALV1.TypeCat. *)
+Require Import TypeTheory.ALV1.TypeCat.
+Require Import TypeTheory.OtherDefs.CwF_Pitts.
 
 Local Open Scope cat.
 
@@ -181,6 +195,7 @@ Proof.
       exact (idpath _).
 Defined.
 
+Axiom K : forall A : UU, isaset(A).
 
 Definition SET_CwF : cwf_struct (SET).
 Proof.
@@ -229,7 +244,83 @@ Proof.
         apply isaset_forall_hSet.
 Admitted.
 
-        
-        
+(* Definition p_gen {Γ Δ : SET} {A : Δ } (σ : Δ --> Γ) : Δ ⋆ A --> Γ.  *)  
 
+Section TypeCat.
+
+Local Notation "Γ ⊢" := (pr1 Γ → SET) (at level 50).
+Local Notation "Γ ⊢ A" :=  (∏ (c : Γ), A c) (at level 50).
+Local Notation "A ⦃ s ⦄" := (λ c, A (s c)) (at level 40, format "A ⦃ s ⦄"). 
+Local Notation "Γ ⋆ A" := (@total2_hSet Γ A) (at level 30).
+
+Definition SET_TypeCat : typecat_structure SET.
+Proof.
+  unfold typecat_structure.
+  use tpair.
+  - unfold typecat_structure1.
+    exists (λ Γ, Γ ⊢).
+    exists (λ Γ A, Γ ⋆ A).
+    intros Γ A Δ σ.
+    exact (A⦃σ⦄).
+  - cbn.
+    unfold typecat_structure2.
+    cbn.
+    use tpair.
+    + intros Γ A.
+      exact pr1.
+    + cbn.
+      use tpair.
+      * intros Γ A Δ σ (x,e).
+        exact (σ x,, e).
+      * cbn.
+        use tpair.
+        ** intros Γ A Δ σ.
+           exact (idpath _).
+        ** cbn.
+           intros Γ A Δ σ.
+           unfold isPullback.
+           cbn.
+           Locate "⦃".
+           intros e h k p. 
+           use tpair.
+        ++ use tpair.
+           intro z.
+           use tpair.
+           -- apply (h z).
+           --  simpl.
+             set (foo := pr2 (k z)).
+             simpl in *.
+             change (σ (h z)) with (σ⦃h⦄ z).
+             exact ( transportf (λ f, A (f z)) (! p) foo ).
+           -- simpl.
+              use tpair.
+              exact (idpath _).
+              simpl.
+              apply funextfun.
+              intro x.
+              change (σ (h x)) with (σ⦃h⦄ x).
+              induction (!p).
+              exact (idpath _).
+              ++ cbn.
+                 intros.
+                 destruct t as [g [p1 p2]].
+                 assert (g =(λ z : e, h z,, transportf (λ f : e → pr1 Γ, A (f z)) (! p) (pr2 (k z))) ).
+                 apply funextfun.
+                 intro y.
+                 set (bar := (λ x : Δ, A (σ x))).
+                 Print tpair.
+                 assert  (pr1 (g y) = pr1 (tpair bar (h y) (transportf (λ f : e → pr1 Γ, A (f y)) (! p) (pr2 (k y))))).
+                 change (pr1 (g y)) with (pr1⦃g⦄ y).
+                 induction (! p1).
+                 exact (idpath _).
+                 apply (@total2_paths_f Δ (λ x : Δ, A (σ x)) _ _ X ).
+                 simpl.
+                 induction (!!X).
+                 Check (transportf (λ x : Δ, A (σ x)) X (pr2 (g y))).
+                 admit.
+                 
+         Admitted.
+                 
+         
+End TypeCat.
 
