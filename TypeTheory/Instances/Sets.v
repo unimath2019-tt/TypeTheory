@@ -304,23 +304,25 @@ Proof.
               ++ cbn.
                  intros.
                  destruct t as [g [p1 p2]].
-                 assert (g =(λ z : e, h z,, transportf (λ f : e → pr1 Γ, A (f z)) (! p) (pr2 (k z))) ).
-                 apply funextfun.
-                 intro y.
-                 set (bar := (λ x : Δ, A (σ x))).
-                 Print tpair.
-                 assert  (pr1 (g y) = pr1 (tpair bar (h y) (transportf (λ f : e → pr1 Γ, A (f y)) (! p) (pr2 (k y))))).
-                 change (pr1 (g y)) with (pr1⦃g⦄ y).
-                 induction (! p1).
-                 exact (idpath _).
-                 apply (@total2_paths_f Δ (λ x : Δ, A (σ x)) _ _ X ).
-                 simpl.
-                 induction (!!X).
-                 Check (transportf (λ x : Δ, A (σ x)) X (pr2 (g y))).
-                 admit.
+                 induction p1.
+                 unshelve eapply (total2_paths_f).
+                 +++ cbn.
+                     apply funextfun.
+                     intro y.
+                     unshelve eapply (total2_paths_f).
+                     cbn.
+                     exact (idpath _).
+                     cbn.
+                     unfold idfun.
+                     induction p2.
+                     cbn.
+                     assert (idpath _ = p).
+                     admit. (*This is easy, because they're hsets *)                    
+                     induction X.
+                     reflexivity.
+                 +++ admit. (*This is easy, because they're hsets *)
                  
          Admitted.
-                 
-         
+                         
 End TypeCat.
 
